@@ -15,7 +15,7 @@
 """Type definitions for the models service."""
 from __future__ import annotations
 
-from collections.abc import Mapping
+from typing import Mapping
 import csv
 import dataclasses
 import datetime
@@ -23,7 +23,7 @@ import json
 import pathlib
 import re
 
-from typing import Any, Iterable, Union
+from typing import Any, Iterable, Union, List, Tuple
 
 import urllib.request
 from typing_extensions import TypedDict
@@ -115,7 +115,7 @@ class Model:
     description: str
     input_token_limit: int
     output_token_limit: int
-    supported_generation_methods: list[str]
+    supported_generation_methods: List[str]
     temperature: float | None = None
     max_temperature: float | None = None
     top_p: float | None = None
@@ -197,7 +197,7 @@ class TunedModel:
     create_time: datetime.datetime | None = None
     update_time: datetime.datetime | None = None
     tuning_task: TuningTask | None = None
-    reader_project_numbers: list[int] | None = None
+    reader_project_numbers: List[int] | None = None
 
     @property
     def permissions(self) -> permission_types.Permissions:
@@ -209,7 +209,7 @@ class TunedModel:
 class TuningTask:
     start_time: datetime.datetime | None = None
     complete_time: datetime.datetime | None = None
-    snapshots: list[TuningSnapshot] = dataclasses.field(default_factory=list)
+    snapshots: List[TuningSnapshot] = dataclasses.field(default_factory=list)
     hyperparameters: Hyperparameters | None = None
 
 
@@ -218,7 +218,7 @@ class TuningExampleDict(TypedDict):
     output: str
 
 
-TuningExampleOptions = Union[TuningExampleDict, protos.TuningExample, tuple[str, str], list[str]]
+TuningExampleOptions = Union[TuningExampleDict, protos.TuningExample, Tuple[str, str], List[str]]
 
 # TODO(markdaoust): gs:// URLS? File-type argument for files without extension?
 TuningDataOptions = Union[

@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping, Sequence
+from typing import Iterable, Mapping, Sequence, Dict, List
 import io
 import inspect
 import mimetypes
@@ -76,7 +76,7 @@ Mode = protos.DynamicRetrievalConfig.Mode
 
 ModeOptions = Union[int, str, Mode]
 
-_MODE: dict[ModeOptions, Mode] = {
+_MODE: Dict[ModeOptions, Mode] = {
     Mode.MODE_UNSPECIFIED: Mode.MODE_UNSPECIFIED,
     0: Mode.MODE_UNSPECIFIED,
     "mode_unspecified": Mode.MODE_UNSPECIFIED,
@@ -158,7 +158,8 @@ class BlobDict(TypedDict):
 def _convert_dict(d: Mapping) -> protos.Content | protos.Part | protos.Blob:
     if is_content_dict(d):
         content = dict(d)
-        if isinstance(parts := content["parts"], str):
+        parts = content["parts"]
+        if isinstance(parts, str):
             content["parts"] = [parts]
         content["parts"] = [to_part(part) for part in content["parts"]]
         return protos.Content(content)
@@ -334,7 +335,7 @@ def to_contents(contents: ContentsType) -> list[protos.Content]:
     return contents
 
 
-def _schema_for_class(cls: TypedDict) -> dict[str, Any]:
+def _schema_for_class(cls: TypedDict) -> Dict[str, Any]:
     schema = _build_schema("dummy", {"dummy": (cls, pydantic.Field())})
     return schema["properties"]["dummy"]
 
@@ -344,7 +345,7 @@ def _schema_for_function(
     *,
     descriptions: Mapping[str, str] | None = None,
     required: Sequence[str] | None = None,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """Generates the OpenAPI Schema for a python function.
 
     Args:
@@ -358,7 +359,7 @@ def _schema_for_function(
             inferred from `f`.
 
     Returns:
-        dict[str, Any]: The OpenAPI Schema for the function `f` in JSON format.
+        Dict[str, Any]: The OpenAPI Schema for the function `f` in JSON format.
     """
     if descriptions is None:
         descriptions = {}
@@ -553,7 +554,7 @@ def _rename_schema_fields(schema):
 
 
 class FunctionDeclaration:
-    def __init__(self, *, name: str, description: str, parameters: dict[str, Any] | None = None):
+    def __init__(self, *, name: str, description: str, parameters: Dict[str, Any] | None = None):
         """A  class wrapping a `protos.FunctionDeclaration`, describes a function for `genai.GenerativeModel`'s `tools`."""
         self._proto = protos.FunctionDeclaration(
             name=name, description=description, parameters=_rename_schema_fields(parameters)
@@ -581,7 +582,7 @@ class FunctionDeclaration:
         return self._proto
 
     @staticmethod
-    def from_function(function: Callable[..., Any], descriptions: dict[str, str] | None = None):
+    def from_function(function: Callable[..., Any], descriptions: Dict[str, str] | None = None):
         """Builds a `CallableFunctionDeclaration` from a python function.
 
         The function should have type annotations.
@@ -602,8 +603,8 @@ class FunctionDeclaration:
         return CallableFunctionDeclaration(**schema, function=function)
 
 
-StructType = dict[str, "ValueType"]
-ValueType = Union[float, str, bool, StructType, list["ValueType"], None]
+StructType = Dict[str, "ValueType"]
+ValueType = Union[float, str, bool, StructType, List["ValueType"], None]
 
 
 class CallableFunctionDeclaration(FunctionDeclaration):
@@ -617,7 +618,7 @@ class CallableFunctionDeclaration(FunctionDeclaration):
         *,
         name: str,
         description: str,
-        parameters: dict[str, Any] | None = None,
+        parameters: Dict[str, Any] | None = None,
         function: Callable[..., Any],
     ):
         super().__init__(name=name, description=description, parameters=parameters)
@@ -633,7 +634,7 @@ class CallableFunctionDeclaration(FunctionDeclaration):
 FunctionDeclarationType = Union[
     FunctionDeclaration,
     protos.FunctionDeclaration,
-    dict[str, Any],
+    Dict[str, Any],
     Callable[..., Any],
 ]
 
